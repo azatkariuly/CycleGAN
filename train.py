@@ -95,7 +95,7 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
 
         loop.set_postfix(H_real=H_reals/(idx+1), H_fake=H_fakes/(idx+1))
 
-    return fake_zebra_collection, fake_horse_collection
+    return fake_zebra_collection.cuda(), fake_horse_collection.cuda()
 
 
 
@@ -168,6 +168,9 @@ def main():
         real_horse = torch.cat((real_horse, horse))
         if idx%200 == 0:
             print('Done: ', idx, '; Size:', real_horse.shape)
+
+    real_zebra = real_zebra.cuda()
+    real_horse = real_horse.cuda()
 
     print('Starting the training..')
     for epoch in range(config.NUM_EPOCHS):

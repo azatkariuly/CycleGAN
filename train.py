@@ -166,8 +166,8 @@ def main():
     for idx, (zebra, horse) in enumerate(loader):
         real_zebra = torch.cat((real_zebra, zebra))
         real_horse = torch.cat((real_horse, horse))
-        if idx%100 == 0:
-            print('Done: ', idx)
+        if idx%200 == 0:
+            print('Done: ', idx, '; Size:', real_horse.shape)
 
     print('Starting the training..')
     for epoch in range(config.NUM_EPOCHS):

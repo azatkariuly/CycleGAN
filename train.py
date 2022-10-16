@@ -162,9 +162,12 @@ def main():
     real_zebra = torch.Tensor([])
     real_horse = torch.Tensor([])
 
+    print('Starting to collect real dataset..')
     for idx, (zebra, horse) in enumerate(loader):
         real_zebra = torch.cat((real_zebra, zebra))
         real_horse = torch.cat((real_horse, horse))
+        if idx%100 == 0:
+            print('Done: ', idx)
 
     print('Starting the training..')
     for epoch in range(config.NUM_EPOCHS):

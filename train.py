@@ -17,6 +17,9 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
     H_fakes = 0
     loop = tqdm(loader, leave=True)
 
+    fake_zebra_collection = torch.Tensor([])
+    fake_horse_collection = torch.Tensor([])
+
     for idx, (zebra, horse) in enumerate(loop):
         zebra = zebra.to(config.DEVICE)
         horse = horse.to(config.DEVICE)
@@ -24,6 +27,8 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
         # Train Discriminators H and Z
         with torch.cuda.amp.autocast():
             fake_horse = gen_H(zebra)
+            fake_horse_collection = torch.cat((fake_horse_collection, fake_horse))
+
             D_H_real = disc_H(horse)
             D_H_fake = disc_H(fake_horse.detach())
             H_reals += D_H_real.mean().item()
@@ -33,6 +38,8 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
             D_H_loss = D_H_real_loss + D_H_fake_loss
 
             fake_zebra = gen_Z(horse)
+            fake_zebra_collection = torch.cat((fake_zebra_collection, fake_zebra))
+
             D_Z_real = disc_Z(zebra)
             D_Z_fake = disc_Z(fake_zebra.detach())
             D_Z_real_loss = mse(D_Z_real, torch.ones_like(D_Z_real))
@@ -87,6 +94,8 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
             save_image(fake_zebra*0.5+0.5, f"saved_images/zebra_{idx}.png")
 
         loop.set_postfix(H_real=H_reals/(idx+1), H_fake=H_fakes/(idx+1))
+
+    return fake_zebra_collection, fake_horse_collection
 
 
 
@@ -146,14 +155,29 @@ def main():
     g_scaler = torch.cuda.amp.GradScaler()
     d_scaler = torch.cuda.amp.GradScaler()
 
+    block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[2048]
+    model = InceptionV3([block_idx])
+    model = model.cuda()
+
+    real_zebra = torch.Tensor([])
+    real_horse = torch.Tensor([])
+
+    for idx, (zebra, horse) in enumerate(loader):
+        real_zebra = torch.cat((real_zebra, zebra))
+        real_horse = torch.cat((real_horse, horse))
+
+    print('Starting the training..')
     for epoch in range(config.NUM_EPOCHS):
-        train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, L1, mse, d_scaler, g_scaler)
+        fake_zebra, fake_horse = train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, L1, mse, d_scaler, g_scaler)
 
         if config.SAVE_MODEL:
             save_checkpoint(gen_H, opt_gen, filename=config.CHECKPOINT_GEN_H)
             save_checkpoint(gen_Z, opt_gen, filename=config.CHECKPOINT_GEN_Z)
             save_checkpoint(disc_H, opt_disc, filename=config.CHECKPOINT_CRITIC_H)
             save_checkpoint(disc_Z, opt_disc, filename=config.CHECKPOINT_CRITIC_Z)
+
+        fretchet_dist = calculate_fretchet(real_zebra, fake_zebra, model)
+        print('Total FID:', fretchet_dist)
 
 if __name__ == "__main__":
     main()

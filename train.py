@@ -2,6 +2,7 @@ import torch
 from dataset import HorseZebraDataset
 import sys
 from utils import save_checkpoint, load_checkpoint
+from fid import InceptionV3, calculate_fretchet
 from torch.utils.data import DataLoader
 import torch.nn as nn
 import torch.optim as optim

@@ -179,7 +179,7 @@ def main():
 
     block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[2048]
     model = InceptionV3([block_idx])
-    model = model.cuda()
+    model = model.to(device)
 
     real_zebra = torch.Tensor([])
     real_horse = torch.Tensor([])
@@ -189,8 +189,8 @@ def main():
         real_zebra = torch.cat((real_zebra, zebra))
         real_horse = torch.cat((real_horse, horse))
 
-    real_zebra = real_zebra.cuda()
-    real_horse = real_horse.cuda()
+    real_zebra = real_zebra.to(device)
+    real_horse = real_horse.to(device)
 
     print('Starting the training..')
     for epoch in range(config.NUM_EPOCHS):

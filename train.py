@@ -17,8 +17,8 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
     H_fakes = 0
     loop = tqdm(loader, leave=True)
 
-    fake_zebra_collection = torch.Tensor([])
-    fake_horse_collection = torch.Tensor([])
+    fake_zebra_collection = torch.Tensor([]).cuda()
+    fake_horse_collection = torch.Tensor([]).cuda()
 
     for idx, (zebra, horse) in enumerate(loop):
         zebra = zebra.to(config.DEVICE)
@@ -95,7 +95,7 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
 
         loop.set_postfix(H_real=H_reals/(idx+1), H_fake=H_fakes/(idx+1))
 
-    return fake_zebra_collection.cuda(), fake_horse_collection.cuda()
+    return fake_zebra_collection, fake_horse_collection
 
 
 

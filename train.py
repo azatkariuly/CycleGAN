@@ -126,15 +126,15 @@ def main():
     dataset = HorseZebraDataset(
         root_horse=config.TRAIN_DIR+"/horses", root_zebra=config.TRAIN_DIR+"/zebras", transform=config.transforms
     )
-    val_dataset = HorseZebraDataset(
-       root_horse="cyclegan_test/horse1", root_zebra="cyclegan_test/zebra1", transform=config.transforms
-    )
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=1,
-        shuffle=False,
-        pin_memory=True,
-    )
+    # val_dataset = HorseZebraDataset(
+    #    root_horse="cyclegan_test/horse1", root_zebra="cyclegan_test/zebra1", transform=config.transforms
+    # )
+    # val_loader = DataLoader(
+    #     val_dataset,
+    #     batch_size=1,
+    #     shuffle=False,
+    #     pin_memory=True,
+    # )
     loader = DataLoader(
         dataset,
         batch_size=config.BATCH_SIZE,

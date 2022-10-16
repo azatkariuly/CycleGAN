@@ -1,3 +1,4 @@
+import argparse
 import torch
 from dataset import HorseZebraDataset
 import sys
@@ -5,12 +6,21 @@ from utils import save_checkpoint, load_checkpoint
 from fid import InceptionV3, calculate_fretchet
 from torch.utils.data import DataLoader
 import torch.nn as nn
+import torch.nn.parallel
+import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import config
 from tqdm import tqdm
 from torchvision.utils import save_image
 from discriminator_model import Discriminator
 from generator_model import Generator
+
+parser = argparse.ArgumentParser(description='PyTorch GAN Training')
+
+parser.add_argument('--type', default='torch.cuda.FloatTensor',
+                    help='type of tensor - e.g torch.cuda.HalfTensor')
+parser.add_argument('--gpus', default='0',
+                    help='gpus used for training - e.g 0,1,3')
 
 def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d_scaler, g_scaler):
     H_reals = 0
@@ -21,8 +31,8 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
     fake_horse_collection = torch.Tensor([]).cuda()
 
     for idx, (zebra, horse) in enumerate(loop):
-        zebra = zebra.to(config.DEVICE)
-        horse = horse.to(config.DEVICE)
+        zebra = zebra.to(device)
+        horse = horse.to(device)
 
         # Train Discriminators H and Z
         with torch.cuda.amp.autocast():
@@ -100,10 +110,22 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
 
 
 def main():
-    disc_H = Discriminator(in_channels=3).to(config.DEVICE)
-    disc_Z = Discriminator(in_channels=3).to(config.DEVICE)
-    gen_Z = Generator(img_channels=3, num_residuals=9).to(config.DEVICE)
-    gen_H = Generator(img_channels=3, num_residuals=9).to(config.DEVICE)
+    global args
+    args = parser.parse_args()
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    if 'cuda' in args.type:
+        args.gpus = [int(i) for i in args.gpus.split(',')]
+        torch.cuda.set_device(args.gpus[0])
+        cudnn.benchmark = True
+    else:
+        args.gpus = None
+
+    disc_H = Discriminator(in_channels=3).to(device)
+    disc_Z = Discriminator(in_channels=3).to(device)
+    gen_Z = Generator(img_channels=3, num_residuals=9).to(device)
+    gen_H = Generator(img_channels=3, num_residuals=9).to(device)
     opt_disc = optim.Adam(
         list(disc_H.parameters()) + list(disc_Z.parameters()),
         lr=config.LEARNING_RATE,
@@ -163,11 +185,9 @@ def main():
     real_horse = torch.Tensor([])
 
     print('Starting to collect real dataset..')
-    for idx, (zebra, horse) in enumerate(loader):
+    for idx, (zebra, horse) in enumerate(tqdm(loader, leave=True)):
         real_zebra = torch.cat((real_zebra, zebra))
         real_horse = torch.cat((real_horse, horse))
-        if idx%200 == 0:
-            print('Done: ', idx, '; Size:', real_horse.shape)
 
     real_zebra = real_zebra.cuda()
     real_horse = real_horse.cuda()

@@ -22,7 +22,7 @@ parser.add_argument('--type', default='torch.cuda.FloatTensor',
 parser.add_argument('--gpus', default='0',
                     help='gpus used for training - e.g 0,1,3')
 
-def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d_scaler, g_scaler):
+def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d_scaler, g_scaler, device):
     H_reals = 0
     H_fakes = 0
     loop = tqdm(loader, leave=True)
@@ -194,7 +194,7 @@ def main():
 
     print('Starting the training..')
     for epoch in range(config.NUM_EPOCHS):
-        fake_zebra, fake_horse = train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, L1, mse, d_scaler, g_scaler)
+        fake_zebra, fake_horse = train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, L1, mse, d_scaler, g_scaler, device)
 
         if config.SAVE_MODEL:
             save_checkpoint(gen_H, opt_gen, filename=config.CHECKPOINT_GEN_H)

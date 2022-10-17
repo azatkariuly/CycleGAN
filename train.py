@@ -182,10 +182,20 @@ def main():
     real_zebra = torch.Tensor([])
     real_horse = torch.Tensor([])
 
+    temploader = DataLoader(
+        dataset,
+        batch_size=1334,
+        shuffle=False,
+        num_workers=config.NUM_WORKERS,
+        pin_memory=True
+    )
+
     print('Starting to collect real dataset..')
-    for idx, (zebra, horse) in enumerate(tqdm(loader, leave=True)):
+    for idx, (zebra, horse) in enumerate(tqdm(temploader, leave=True)):
         real_zebra = torch.cat((real_zebra, zebra))
         real_horse = torch.cat((real_horse, horse))
+
+    print('Done colleting dataset; Shape:', real_zebra.shape)
 
     real_zebra = real_zebra.to(device)
     real_horse = real_horse.to(device)

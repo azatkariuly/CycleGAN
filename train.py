@@ -208,7 +208,7 @@ def main():
     print('Starting the training..')
     for epoch in range(config.NUM_EPOCHS):
         fake_zebra, fake_horse = train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, L1, mse, d_scaler, g_scaler, device)
-
+        torch.save(fake_zebra, 'fake_zebra.pt')
         print('Collection is done:', fake_zebra.shape)
         if config.SAVE_MODEL:
             save_checkpoint(gen_H, opt_gen, filename=config.CHECKPOINT_GEN_H)

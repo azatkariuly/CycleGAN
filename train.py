@@ -27,12 +27,12 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
     H_fakes = 0
     loop = tqdm(loader, leave=True)
 
-    fake_zebra_collection = torch.Tensor([]).to(device)
-    fake_horse_collection = torch.Tensor([]).to(device)
+    fake_zebra_collection = torch.Tensor([]).cuda()
+    fake_horse_collection = torch.Tensor([]).cuda()
 
     for idx, (zebra, horse) in enumerate(loop):
-        zebra = zebra.to(device)
-        horse = horse.to(device)
+        zebra = zebra.cuda()
+        horse = horse.cuda()
 
         # Train Discriminators H and Z
         with torch.cuda.amp.autocast():
@@ -108,22 +108,19 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
     return fake_zebra_collection.type(torch.FloatTensor), fake_horse_collection.type(torch.FloatTensor)
 
 def main():
+    if not torch.cuda.is_available():
+        sys.exit(1)
+
     global args
     args = parser.parse_args()
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    cudnn.benchmark = True
+    cudnn.enabled = True
 
-    if 'cuda' in args.type:
-        args.gpus = [int(i) for i in args.gpus.split(',')]
-        torch.cuda.set_device(args.gpus[0])
-        cudnn.benchmark = True
-    else:
-        args.gpus = None
-
-    disc_H = Discriminator(in_channels=3).to(device)
-    disc_Z = Discriminator(in_channels=3).to(device)
-    gen_Z = Generator(img_channels=3, num_residuals=9).to(device)
-    gen_H = Generator(img_channels=3, num_residuals=9).to(device)
+    disc_H = Discriminator(in_channels=3).cuda()
+    disc_Z = Discriminator(in_channels=3).cuda()
+    gen_Z = Generator(img_channels=3, num_residuals=9).cuda()
+    gen_H = Generator(img_channels=3, num_residuals=9).cuda()
     opt_disc = optim.Adam(
         list(disc_H.parameters()) + list(disc_Z.parameters()),
         lr=config.LEARNING_RATE,
@@ -178,11 +175,9 @@ def main():
     block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[2048]
     model = InceptionV3([block_idx])
 
-    if args.gpus and len(args.gpus) > 1:
-        print('creating multiple gpus')
-        model = torch.nn.DataParallel(model, args.gpus)
+    model = nn.DataParallel(model).cuda()
 
-    # model = model.to(device)
+    # model = model.cuda()
 
     real_zebra = torch.Tensor([])
     real_horse = torch.Tensor([])
@@ -202,15 +197,15 @@ def main():
 
     print('Done colleting dataset')
 
-    real_zebra = real_zebra.to(device)
-    real_horse = real_horse.to(device)
+    real_zebra = real_zebra.cuda()
+    real_horse = real_horse.cuda()
 
     print('Starting the training..')
     for epoch in range(config.NUM_EPOCHS):
         # fake_zebra, fake_horse = train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, L1, mse, d_scaler, g_scaler, device)
         # torch.save(fake_zebra, 'fake_zebra.pt')
         fake_zebra = torch.load('fake_zebra.pt')
-        fake_zebra = fake_zebra.to(device)
+        fake_zebra = fake_zebra.cuda()
         print('Collection is done:', fake_zebra.shape)
         # if config.SAVE_MODEL:
         #     save_checkpoint(gen_H, opt_gen, filename=config.CHECKPOINT_GEN_H)

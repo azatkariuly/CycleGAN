@@ -138,7 +138,7 @@ def calculate_activation_statistics(images,model,batch_size=128, dims=2048,
     # else:
     #     batch=images
 
-    pred = model(images)
+    pred = model(images)[0]
     print('done calculating statistics:', pred.shape)
 
         # If model output is not scalar, apply global spatial average pooling.

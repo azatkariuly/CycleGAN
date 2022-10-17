@@ -105,7 +105,7 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
 
         loop.set_postfix(H_real=H_reals/(idx+1), H_fake=H_fakes/(idx+1))
 
-    return fake_zebra, fake_horse, zebra
+    return fake_zebra, fake_horse, zebra.type(torch.FloatTensor)
 
 
 
@@ -202,7 +202,6 @@ def main():
             save_checkpoint(disc_H, opt_disc, filename=config.CHECKPOINT_CRITIC_H)
             save_checkpoint(disc_Z, opt_disc, filename=config.CHECKPOINT_CRITIC_Z)
 
-        print(type(real_zebra), type(fake_zebra))
         fretchet_dist = calculate_fretchet(real_zebra, fake_zebra, model)
         print('Total FID:', fretchet_dist)
 

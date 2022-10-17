@@ -1,3 +1,4 @@
+import os
 import torch
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
@@ -10,13 +11,14 @@ LEARNING_RATE = 1e-5
 LAMBDA_IDENTITY = 0.0
 LAMBDA_CYCLE = 10
 NUM_WORKERS = 4
-NUM_EPOCHS = 10
+NUM_EPOCHS = 500
 LOAD_MODEL = False
 SAVE_MODEL = True
-CHECKPOINT_GEN_H = "genh.pth.tar"
-CHECKPOINT_GEN_Z = "genz.pth.tar"
-CHECKPOINT_CRITIC_H = "critich.pth.tar"
-CHECKPOINT_CRITIC_Z = "criticz.pth.tar"
+SAVE_DIRECTORY = "results"
+CHECKPOINT_GEN_H = os.path.join(SAVE_DIRECTORY, "genh.pth.tar")
+CHECKPOINT_GEN_Z = os.path.join(SAVE_DIRECTORY, "genz.pth.tar")
+CHECKPOINT_CRITIC_H = os.path.join(SAVE_DIRECTORY, "critich.pth.tar")
+CHECKPOINT_CRITIC_Z = os.path.join(SAVE_DIRECTORY, "criticz.pth.tar")
 
 transforms = A.Compose(
     [

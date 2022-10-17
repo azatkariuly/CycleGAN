@@ -111,8 +111,9 @@ def main():
     if not torch.cuda.is_available():
         sys.exit(1)
 
-    global args
+    global args, best_fid
     args = parser.parse_args()
+    best_fid = float('inf')
 
     cudnn.benchmark = True
     cudnn.enabled = True
@@ -203,15 +204,16 @@ def main():
     print('Starting the training..')
     for epoch in range(config.NUM_EPOCHS):
         fake_zebra, fake_horse = train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, L1, mse, d_scaler, g_scaler)
-
-        # if config.SAVE_MODEL:
-        #     save_checkpoint(gen_H, opt_gen, filename=config.CHECKPOINT_GEN_H)
-        #     save_checkpoint(gen_Z, opt_gen, filename=config.CHECKPOINT_GEN_Z)
-        #     save_checkpoint(disc_H, opt_disc, filename=config.CHECKPOINT_CRITIC_H)
-        #     save_checkpoint(disc_Z, opt_disc, filename=config.CHECKPOINT_CRITIC_Z)
-
         fretchet_dist = calculate_fretchet(real_zebra, fake_zebra, model)
         print('Total FID => Zebra:', fretchet_dist)
+
+        if best_fid > fretchet_dist:
+            best_fid = fretchet_dist
+
+            save_checkpoint(gen_H, opt_gen, filename=config.CHECKPOINT_GEN_H)
+            save_checkpoint(gen_Z, opt_gen, filename=config.CHECKPOINT_GEN_Z)
+            save_checkpoint(disc_H, opt_disc, filename=config.CHECKPOINT_CRITIC_H)
+            save_checkpoint(disc_Z, opt_disc, filename=config.CHECKPOINT_CRITIC_Z)
 
 if __name__ == "__main__":
     main()

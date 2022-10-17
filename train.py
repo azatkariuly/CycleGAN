@@ -105,7 +105,7 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
 
         loop.set_postfix(H_real=H_reals/(idx+1), H_fake=H_fakes/(idx+1))
 
-    return fake_zebra, fake_horse
+    return fake_zebra, fake_horse, zebra
 
 
 
@@ -194,7 +194,7 @@ def main():
 
     print('Starting the training..')
     for epoch in range(config.NUM_EPOCHS):
-        fake_zebra, fake_horse = train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, L1, mse, d_scaler, g_scaler, device)
+        fake_zebra, fake_horse, real_zebra = train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, L1, mse, d_scaler, g_scaler, device)
 
         if config.SAVE_MODEL:
             save_checkpoint(gen_H, opt_gen, filename=config.CHECKPOINT_GEN_H)

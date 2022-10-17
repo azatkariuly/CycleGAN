@@ -200,7 +200,7 @@ def main():
         real_zebra = torch.cat((real_zebra, zebra))
         real_horse = torch.cat((real_horse, horse))
 
-    print('Done colleting dataset; Shape:')
+    print('Done colleting dataset')
 
     real_zebra = real_zebra.to(device)
     real_horse = real_horse.to(device)

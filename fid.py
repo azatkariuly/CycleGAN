@@ -11,6 +11,7 @@ import torchvision.models as models
 
 from scipy import linalg
 from torch.nn.functional import adaptive_avg_pool2d
+from torch.autograd import Variable
 
 class InceptionV3(nn.Module):
     """Pretrained InceptionV3 network returning feature maps"""
@@ -132,12 +133,13 @@ def calculate_activation_statistics(images,model,batch_size=128, dims=2048,
     model.eval()
     act=np.empty((len(images), dims))
 
-    if cuda:
-        batch=images.cuda()
-    else:
-        batch=images
-    print(batch)
-    pred = model(batch)[0]
+    # if cuda:
+    #     batch=images.cuda()
+    # else:
+    #     batch=images
+
+    pred = model(images)
+    print('done calculating statistics:', pred.shape)
 
         # If model output is not scalar, apply global spatial average pooling.
         # This happens if you choose a dimensionality not equal 2048.

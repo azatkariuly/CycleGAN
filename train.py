@@ -202,6 +202,7 @@ def main():
             save_checkpoint(disc_H, opt_disc, filename=config.CHECKPOINT_CRITIC_H)
             save_checkpoint(disc_Z, opt_disc, filename=config.CHECKPOINT_CRITIC_Z)
 
+        print(type(real_zebra), type(fake_zebra))
         fretchet_dist = calculate_fretchet(real_zebra, fake_zebra, model)
         print('Total FID:', fretchet_dist)
 

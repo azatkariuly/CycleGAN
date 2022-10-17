@@ -136,6 +136,7 @@ def calculate_activation_statistics(images,model,batch_size=128, dims=2048,
         batch=images.cuda()
     else:
         batch=images
+    print(batch)
     pred = model(batch)[0]
 
         # If model output is not scalar, apply global spatial average pooling.

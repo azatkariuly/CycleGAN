@@ -17,7 +17,7 @@ from generator_model import Generator
 
 parser = argparse.ArgumentParser(description='PyTorch GAN Training')
 
-parser.add_argument('--type', default='torch.cuda.FloatTensor',
+parser.add_argument('--type', default='torch.cuda.HalfTensor',
                     help='type of tensor - e.g torch.cuda.HalfTensor')
 parser.add_argument('--gpus', default='0',
                     help='gpus used for training - e.g 0,1,3')

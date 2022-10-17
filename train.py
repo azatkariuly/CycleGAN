@@ -210,13 +210,13 @@ def main():
         # fake_zebra, fake_horse = train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, L1, mse, d_scaler, g_scaler, device)
         # torch.save(fake_zebra, 'fake_zebra.pt')
         fake_zebra = torch.load('fake_zebra.pt')
-        
+        fake_zebra = fake_zebra.to(device)
         print('Collection is done:', fake_zebra.shape)
-        if config.SAVE_MODEL:
-            save_checkpoint(gen_H, opt_gen, filename=config.CHECKPOINT_GEN_H)
-            save_checkpoint(gen_Z, opt_gen, filename=config.CHECKPOINT_GEN_Z)
-            save_checkpoint(disc_H, opt_disc, filename=config.CHECKPOINT_CRITIC_H)
-            save_checkpoint(disc_Z, opt_disc, filename=config.CHECKPOINT_CRITIC_Z)
+        # if config.SAVE_MODEL:
+        #     save_checkpoint(gen_H, opt_gen, filename=config.CHECKPOINT_GEN_H)
+        #     save_checkpoint(gen_Z, opt_gen, filename=config.CHECKPOINT_GEN_Z)
+        #     save_checkpoint(disc_H, opt_disc, filename=config.CHECKPOINT_CRITIC_H)
+        #     save_checkpoint(disc_Z, opt_disc, filename=config.CHECKPOINT_CRITIC_Z)
 
         fretchet_dist = calculate_fretchet(real_zebra, fake_zebra, model)
         print('Total FID:', fretchet_dist)

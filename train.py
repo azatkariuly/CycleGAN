@@ -215,5 +215,7 @@ def main():
             save_checkpoint(disc_H, opt_disc, filename=config.CHECKPOINT_CRITIC_H)
             save_checkpoint(disc_Z, opt_disc, filename=config.CHECKPOINT_CRITIC_Z)
 
+        print('BEST FID:', best_fid)
+
 if __name__ == "__main__":
     main()

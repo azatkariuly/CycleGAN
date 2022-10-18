@@ -118,10 +118,16 @@ def main():
     cudnn.benchmark = True
     cudnn.enabled = True
 
-    disc_H = Discriminator(in_channels=3).cuda()
-    disc_Z = Discriminator(in_channels=3).cuda()
-    gen_Z = Generator(img_channels=3, num_residuals=9).cuda()
-    gen_H = Generator(img_channels=3, num_residuals=9).cuda()
+    # nn.DataParallel(model).cuda()
+    # disc_H = Discriminator(in_channels=3).cuda()
+    # disc_Z = Discriminator(in_channels=3).cuda()
+    # gen_Z = Generator(img_channels=3, num_residuals=9).cuda()
+    # gen_H = Generator(img_channels=3, num_residuals=9).cuda()
+
+    disc_H = nn.DataParallel(Discriminator(in_channels=3)).cuda()
+    disc_Z = nn.DataParallel(Discriminator(in_channels=3)).cuda()
+    gen_Z = nn.DataParallel(Generator(img_channels=3, num_residuals=9)).cuda()
+    gen_H = nn.DataParallel(Generator(img_channels=3, num_residuals=9)).cuda()
     opt_disc = optim.Adam(
         list(disc_H.parameters()) + list(disc_Z.parameters()),
         lr=config.LEARNING_RATE,

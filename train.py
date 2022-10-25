@@ -183,8 +183,8 @@ def main():
     g_scaler = torch.cuda.amp.GradScaler()
     d_scaler = torch.cuda.amp.GradScaler()
 
-    real_zebra = torch.Tensor([]).cuda()
-    real_horse = torch.Tensor([]).cuda()
+    real_zebra = torch.Tensor([])
+    real_horse = torch.Tensor([])
 
     temploader = DataLoader(
         dataset,

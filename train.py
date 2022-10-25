@@ -118,6 +118,10 @@ def main():
     cudnn.benchmark = True
     cudnn.enabled = True
 
+    block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[2048]
+    model = InceptionV3([block_idx])
+    model = nn.DataParallel(model).cuda()
+
     # nn.DataParallel(model).cuda()
     disc_H = Discriminator(in_channels=3).cuda()
     disc_Z = Discriminator(in_channels=3).cuda()
@@ -179,15 +183,8 @@ def main():
     g_scaler = torch.cuda.amp.GradScaler()
     d_scaler = torch.cuda.amp.GradScaler()
 
-    block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[2048]
-    model = InceptionV3([block_idx])
-
-    model = nn.DataParallel(model).cuda()
-
-    # model = model.cuda()
-
-    real_zebra = torch.Tensor([])
-    real_horse = torch.Tensor([])
+    real_zebra = torch.Tensor([]).cuda()
+    real_horse = torch.Tensor([]).cuda()
 
     temploader = DataLoader(
         dataset,

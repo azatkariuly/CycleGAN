@@ -118,9 +118,13 @@ def main():
     cudnn.benchmark = True
     cudnn.enabled = True
 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print('device sfmaismf:', device)
+
     block_idx = InceptionV3.BLOCK_INDEX_BY_DIM[2048]
     model = InceptionV3([block_idx])
-    model = nn.DataParallel(model).cuda()
+    model = nn.DataParallel(model)
+    model.to(device)
 
     # nn.DataParallel(model).cuda()
     disc_H = Discriminator(in_channels=3).cuda()

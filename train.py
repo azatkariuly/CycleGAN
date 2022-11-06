@@ -212,7 +212,9 @@ def main():
     for epoch in range(config.NUM_EPOCHS):
         real_zebra, fake_zebra, real_horse, fake_horse = train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, L1, mse, d_scaler, g_scaler)
         fretchet_dist = calculate_fretchet(real_zebra, fake_zebra, model)
+        fretchet_dist1 = calculate_fretchet(real_zebra, fake_horse, model)
         print('Total FID => Zebra:', fretchet_dist)
+        print('FAKE FID ==> Zebra:', fretchet_dist1)
 
         if best_fid > fretchet_dist:
             best_fid = fretchet_dist

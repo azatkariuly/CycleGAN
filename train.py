@@ -27,8 +27,8 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
     H_fakes = 0
     loop = tqdm(loader, leave=True)
 
-    fake_zebra_collection = torch.Tensor([]).cuda()
-    fake_horse_collection = torch.Tensor([]).cuda()
+    # fake_zebra_collection = torch.Tensor([]).cuda()
+    # fake_horse_collection = torch.Tensor([]).cuda()
 
     for idx, (zebra, horse) in enumerate(loop):
         zebra = zebra.cuda()
@@ -37,7 +37,7 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
         # Train Discriminators H and Z
         with torch.cuda.amp.autocast():
             fake_horse = gen_H(zebra)
-            fake_horse_collection = torch.cat((fake_horse_collection, fake_horse))
+            # fake_horse_collection = torch.cat((fake_horse_collection, fake_horse))
 
             D_H_real = disc_H(horse)
             D_H_fake = disc_H(fake_horse.detach())
@@ -48,7 +48,7 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
             D_H_loss = D_H_real_loss + D_H_fake_loss
 
             fake_zebra = gen_Z(horse)
-            fake_zebra_collection = torch.cat((fake_zebra_collection, fake_zebra))
+            # fake_zebra_collection = torch.cat((fake_zebra_collection, fake_zebra))
 
             D_Z_real = disc_Z(zebra)
             D_Z_fake = disc_Z(fake_zebra.detach())
@@ -105,7 +105,7 @@ def train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d
 
         loop.set_postfix(H_real=H_reals/(idx+1), H_fake=H_fakes/(idx+1))
 
-    return fake_zebra_collection.type(torch.FloatTensor), fake_horse_collection.type(torch.FloatTensor)
+    return zebra, fake_zebra, horse, fake_horse
 
 def main():
     if not torch.cuda.is_available():
@@ -187,30 +187,30 @@ def main():
     g_scaler = torch.cuda.amp.GradScaler()
     d_scaler = torch.cuda.amp.GradScaler()
 
-    real_zebra = torch.Tensor([])
-    real_horse = torch.Tensor([])
-
-    temploader = DataLoader(
-        dataset,
-        batch_size=1334,
-        shuffle=False,
-        num_workers=config.NUM_WORKERS,
-        pin_memory=True
-    )
-
-    print('Starting to collect real dataset..')
-    for idx, (zebra, horse) in enumerate(tqdm(temploader, leave=True)):
-        real_zebra = torch.cat((real_zebra, zebra))
-        real_horse = torch.cat((real_horse, horse))
-
-    print('Done colleting dataset')
-
-    real_zebra.to(device)
-    real_horse.to(device)
+    # real_zebra = torch.Tensor([])
+    # real_horse = torch.Tensor([])
+    #
+    # temploader = DataLoader(
+    #     dataset,
+    #     batch_size=1334,
+    #     shuffle=False,
+    #     num_workers=config.NUM_WORKERS,
+    #     pin_memory=True
+    # )
+    #
+    # print('Starting to collect real dataset..')
+    # for idx, (zebra, horse) in enumerate(tqdm(temploader, leave=True)):
+    #     real_zebra = torch.cat((real_zebra, zebra))
+    #     real_horse = torch.cat((real_horse, horse))
+    #
+    # print('Done colleting dataset')
+    #
+    # real_zebra.to(device)
+    # real_horse.to(device)
 
     print('Starting the training..')
     for epoch in range(config.NUM_EPOCHS):
-        fake_zebra, fake_horse = train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, L1, mse, d_scaler, g_scaler)
+        real_zebra, fake_zebra, real_horse, fake_horse = train_fn(disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, L1, mse, d_scaler, g_scaler)
         fretchet_dist = calculate_fretchet(real_zebra, fake_zebra, model)
         print('Total FID => Zebra:', fretchet_dist)
 
